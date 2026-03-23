@@ -93,8 +93,25 @@ jobs:
         run: |
           set -euo pipefail
 
-          mkdir -p dist/full/assets
-          rsync -a assets/ dist/full/assets/
+          mkdir -p dist/full
+
+          RESOURCE_DIRS=()
+          for d in assets image index announcement model pipeline resource; do
+            if [[ -d "$d" ]]; then
+              RESOURCE_DIRS+=("$d")
+            fi
+          done
+
+          if [[ ${#RESOURCE_DIRS[@]} -eq 0 ]]; then
+            echo "[ERROR] 未找到可打包资源目录"
+            exit 1
+          fi
+
+          echo "Package full resource dirs: ${RESOURCE_DIRS[*]}"
+          for d in "${RESOURCE_DIRS[@]}"; do
+            mkdir -p "dist/full/$d"
+            rsync -a "$d/" "dist/full/$d/"
+          done
 
       - name: Build hotfix package
         shell: bash
@@ -102,6 +119,18 @@ jobs:
           set -euo pipefail
 
           mkdir -p dist/hotfix
+
+          RESOURCE_DIRS=()
+          for d in assets image index announcement model pipeline resource; do
+            if [[ -d "$d" ]]; then
+              RESOURCE_DIRS+=("$d")
+            fi
+          done
+
+          if [[ ${#RESOURCE_DIRS[@]} -eq 0 ]]; then
+            echo "[ERROR] 未找到可打包资源目录"
+            exit 1
+          fi
 
           PREVIOUS_TAG="${{ steps.vars.outputs.previous_tag }}"
           COMPARE_REF="${{ steps.vars.outputs.compare_ref }}"
@@ -112,10 +141,22 @@ jobs:
           if [[ -n "$PREVIOUS_TAG" ]] && git rev-parse -q --verify "refs/tags/$PREVIOUS_TAG" >/dev/null; then
             echo "Generate hotfix from $PREVIOUS_TAG -> $COMPARE_REF"
 
-            git diff --name-status "$PREVIOUS_TAG" "$COMPARE_REF" -- assets/ > dist/hotfix_changes.txt || true
+            git diff --name-status "$PREVIOUS_TAG" "$COMPARE_REF" -- "${RESOURCE_DIRS[@]}" > dist/hotfix_changes.txt || true
 
             while IFS=$'\t' read -r status path1 path2; do
               [[ -z "$status" ]] && continue
+
+              is_resource_path=false
+              for d in "${RESOURCE_DIRS[@]}"; do
+                if [[ "$path1" == "$d/"* ]]; then
+                  is_resource_path=true
+                  break
+                fi
+              done
+
+              if ! $is_resource_path; then
+                continue
+              fi
 
               if [[ "$status" == D* ]]; then
                 mkdir -p dist/hotfix
@@ -129,7 +170,7 @@ jobs:
                 src_path="$path2"
               fi
 
-              if [[ "$src_path" == assets/* ]] && [[ -f "$src_path" ]]; then
+              if [[ -f "$src_path" ]]; then
                 mkdir -p "dist/hotfix/$(dirname "$src_path")"
                 cp "$src_path" "dist/hotfix/$src_path"
                 changed_count=$((changed_count + 1))
@@ -137,14 +178,15 @@ jobs:
             done < dist/hotfix_changes.txt
           else
             echo "No valid previous tag, fallback to full assets as hotfix baseline package"
-            mkdir -p dist/hotfix/assets
-            rsync -a assets/ dist/hotfix/assets/
+            for d in "${RESOURCE_DIRS[@]}"; do
+              mkdir -p "dist/hotfix/$d"
+              rsync -a "$d/" "dist/hotfix/$d/"
+            done
             changed_count=1
           fi
 
           if [[ $changed_count -eq 0 && $deleted_count -eq 0 ]]; then
-            mkdir -p dist/hotfix/assets/resource
-            echo "no file changed" > dist/hotfix/assets/resource/.hotfix-empty
+            echo "no file changed" > dist/hotfix/.hotfix-empty
           fi
 
       - name: Archive packages
