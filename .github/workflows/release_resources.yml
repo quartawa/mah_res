@@ -1,0 +1,184 @@
+name: release_resources
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "目标版本号（如 v1.0.1）"
+        required: true
+        type: string
+      previous_tag:
+        description: "hotfix 对比基线（可选，不填自动推断）"
+        required: false
+        default: ""
+        type: string
+      publish_release:
+        description: "是否发布到 GitHub Release"
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  build_and_release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve version and refs
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          EVENT_NAME="${{ github.event_name }}"
+
+          if [[ "$EVENT_NAME" == "push" ]]; then
+            TAG_NAME="${{ github.ref_name }}"
+            PUBLISH_RELEASE=true
+            PREVIOUS_TAG_INPUT=""
+          else
+            TAG_NAME="${{ inputs.tag }}"
+            PUBLISH_RELEASE="${{ inputs.publish_release }}"
+            PREVIOUS_TAG_INPUT="${{ inputs.previous_tag }}"
+          fi
+
+          if [[ -z "$TAG_NAME" ]]; then
+            echo "[ERROR] tag 不能为空"
+            exit 1
+          fi
+
+          if [[ "$TAG_NAME" != v* ]]; then
+            TAG_NAME="v$TAG_NAME"
+          fi
+
+          git fetch --tags --force
+
+          COMPARE_REF="HEAD"
+          if git rev-parse -q --verify "refs/tags/$TAG_NAME" >/dev/null; then
+            git checkout -f "$TAG_NAME"
+            COMPARE_REF="$TAG_NAME"
+          else
+            echo "[WARN] 未找到 tag $TAG_NAME，将基于当前提交构建包"
+          fi
+
+          if [[ -n "$PREVIOUS_TAG_INPUT" ]]; then
+            PREVIOUS_TAG="$PREVIOUS_TAG_INPUT"
+          else
+            PREVIOUS_TAG="$(git tag --sort=-creatordate | grep -vx "$TAG_NAME" | head -n 1 || true)"
+          fi
+
+          IS_PRERELEASE=false
+          if [[ "$TAG_NAME" =~ (alpha|beta|rc|dev) ]]; then
+            IS_PRERELEASE=true
+          fi
+
+          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+          echo "compare_ref=$COMPARE_REF" >> "$GITHUB_OUTPUT"
+          echo "previous_tag=$PREVIOUS_TAG" >> "$GITHUB_OUTPUT"
+          echo "publish_release=$PUBLISH_RELEASE" >> "$GITHUB_OUTPUT"
+          echo "is_prerelease=$IS_PRERELEASE" >> "$GITHUB_OUTPUT"
+
+      - name: Build full package
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p dist/full/assets
+          rsync -a assets/ dist/full/assets/
+
+      - name: Build hotfix package
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p dist/hotfix
+
+          PREVIOUS_TAG="${{ steps.vars.outputs.previous_tag }}"
+          COMPARE_REF="${{ steps.vars.outputs.compare_ref }}"
+
+          changed_count=0
+          deleted_count=0
+
+          if [[ -n "$PREVIOUS_TAG" ]] && git rev-parse -q --verify "refs/tags/$PREVIOUS_TAG" >/dev/null; then
+            echo "Generate hotfix from $PREVIOUS_TAG -> $COMPARE_REF"
+
+            git diff --name-status "$PREVIOUS_TAG" "$COMPARE_REF" -- assets/ > dist/hotfix_changes.txt || true
+
+            while IFS=$'\t' read -r status path1 path2; do
+              [[ -z "$status" ]] && continue
+
+              if [[ "$status" == D* ]]; then
+                mkdir -p dist/hotfix
+                echo "$path1" >> dist/hotfix_deleted_files.txt
+                deleted_count=$((deleted_count + 1))
+                continue
+              fi
+
+              src_path="$path1"
+              if [[ "$status" == R* || "$status" == C* ]]; then
+                src_path="$path2"
+              fi
+
+              if [[ "$src_path" == assets/* ]] && [[ -f "$src_path" ]]; then
+                mkdir -p "dist/hotfix/$(dirname "$src_path")"
+                cp "$src_path" "dist/hotfix/$src_path"
+                changed_count=$((changed_count + 1))
+              fi
+            done < dist/hotfix_changes.txt
+          else
+            echo "No valid previous tag, fallback to full assets as hotfix baseline package"
+            mkdir -p dist/hotfix/assets
+            rsync -a assets/ dist/hotfix/assets/
+            changed_count=1
+          fi
+
+          if [[ $changed_count -eq 0 && $deleted_count -eq 0 ]]; then
+            mkdir -p dist/hotfix/assets/resource
+            echo "no file changed" > dist/hotfix/assets/resource/.hotfix-empty
+          fi
+
+      - name: Archive packages
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TAG_NAME="${{ steps.vars.outputs.tag_name }}"
+
+          (
+            cd dist/full
+            zip -r "../mah_res-full-${TAG_NAME}.zip" .
+          )
+
+          (
+            cd dist/hotfix
+            zip -r "../mah_res-hotfix-${TAG_NAME}.zip" .
+          )
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mah_res-packages-${{ steps.vars.outputs.tag_name }}
+          path: |
+            dist/mah_res-full-${{ steps.vars.outputs.tag_name }}.zip
+            dist/mah_res-hotfix-${{ steps.vars.outputs.tag_name }}.zip
+
+      - name: Publish GitHub Release
+        if: ${{ steps.vars.outputs.publish_release == 'true' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.vars.outputs.tag_name }}
+          files: |
+            dist/mah_res-full-${{ steps.vars.outputs.tag_name }}.zip
+            dist/mah_res-hotfix-${{ steps.vars.outputs.tag_name }}.zip
+          prerelease: ${{ steps.vars.outputs.is_prerelease }}
+          draft: false
