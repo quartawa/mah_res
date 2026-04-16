@@ -531,6 +531,18 @@
         ],
         "path": "ar/ar_caitsith_tezcatlipoca.png"
     },
+    "ar_castro_azathothalphaomega": {
+        "jp_rawname": "きっと同じ宇宙をみる",
+        "rarity": 5,
+        "tag": [
+            "castro",
+            "azathothalphaomega"
+        ],
+        "effect": {
+            "community_update": "public"
+        },
+        "path": "ar/ar_castro_azathothalphaomega.png"
+    },
     "ar_chernobog_andvari": {
         "jp_rawname": "魔王の温泉郷へようこそ",
         "rarity": 4,
@@ -1011,6 +1023,15 @@
         ],
         "path": "ar/ar_hotei_alp.png"
     },
+    "ar_hotei_girimekra": {
+        "jp_rawname": "笑って転げて名コンビ！？",
+        "rarity": 4,
+        "tag": [
+            "hotei",
+            "girimekra"
+        ],
+        "path": "ar/ar_hotei_girimekra.png"
+    },
     "ar_hotei_touji": {
         "jp_rawname": "ハロウィンポリスBack！",
         "rarity": 4,
@@ -1137,6 +1158,15 @@
             "oz"
         ],
         "path": "ar/ar_jormungandr_gorozaemon_oz.png"
+    },
+    "ar_juugo_tadikarao": {
+        "jp_rawname": "GO！Deuce！！",
+        "rarity": 4,
+        "tag": [
+            "juugo",
+            "tadikarao"
+        ],
+        "path": "ar/ar_juugo_tadikarao.png"
     },
     "ar_kagutsuchi_ikutoshi": {
         "jp_rawname": "きょうだい弟子の組手",
@@ -1845,6 +1875,15 @@
         ],
         "path": "ar/ar_sarutahiko_onamuji.png"
     },
+    "ar_sarutahiko_taishakuten": {
+        "jp_rawname": "エンカウントさるの湯！",
+        "rarity": 4,
+        "tag": [
+            "sarutahiko",
+            "taishakuten"
+        ],
+        "path": "ar/ar_sarutahiko_taishakuten.png"
+    },
     "ar_seth_goemon": {
         "jp_rawname": "Surf the wave",
         "rarity": 4,
@@ -2146,6 +2185,15 @@
         ],
         "path": "ar/ar_suzuka_tetsugyuu.png"
     },
+    "ar_tadatomo_blake": {
+        "jp_rawname": "真夜中のドッグファイト！",
+        "rarity": 5,
+        "tag": [
+            "tadatomo",
+            "blake"
+        ],
+        "path": "ar/ar_tadatomo_blake.png"
+    },
     "ar_tadatomo_marchosias": {
         "jp_rawname": "父の思い出",
         "rarity": 5,
@@ -2426,6 +2474,15 @@
             "ulaanbaatar"
         ],
         "path": "ar/ar_tuaring_ulaanbaatar.png"
+    },
+    "ar_tuatgua_cthugha": {
+        "jp_rawname": "グア・グア・ホリデイ",
+        "rarity": 3,
+        "tag": [
+            "tuatgua",
+            "cthugha"
+        ],
+        "path": "ar/ar_tuatgua_cthugha.png"
     },
     "ar_tvastar_kurogane": {
         "jp_rawname": "クラフターズの日課",
