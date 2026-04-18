@@ -2,8 +2,10 @@ name: release_resources
 
 on:
   push:
+    branches:
+      - "**"
     tags:
-      - "v*"
+      - "**"
   workflow_dispatch:
     inputs:
       tag:
@@ -43,48 +45,70 @@ jobs:
           EVENT_NAME="${{ github.event_name }}"
 
           if [[ "$EVENT_NAME" == "push" ]]; then
-            TAG_NAME="${{ github.ref_name }}"
+            REF_TYPE="${{ github.ref_type }}"
+            REF_NAME="${{ github.ref_name }}"
+            COMMIT_SHA="${{ github.sha }}"
+            SHORT_SHA="${COMMIT_SHA:0:7}"
+
+            if [[ "$REF_TYPE" == "tag" ]]; then
+              TAG_NAME="$REF_NAME"
+              PREVIOUS_REF="$(git tag --sort=-creatordate | grep -vx "$TAG_NAME" | head -n 1 || true)"
+              COMPARE_REF="$TAG_NAME"
+              IS_PRERELEASE=false
+            else
+              SAFE_REF_NAME="$(echo "$REF_NAME" | sed 's#[^a-zA-Z0-9._-]#-#g')"
+              TAG_NAME="auto-${SAFE_REF_NAME}-${SHORT_SHA}"
+              BEFORE_SHA="${{ github.event.before }}"
+              if [[ -n "$BEFORE_SHA" && "$BEFORE_SHA" != "0000000000000000000000000000000000000000" ]]; then
+                PREVIOUS_REF="$BEFORE_SHA"
+              else
+                PREVIOUS_REF=""
+              fi
+              COMPARE_REF="$COMMIT_SHA"
+              IS_PRERELEASE=true
+            fi
+
             PUBLISH_RELEASE=true
-            PREVIOUS_TAG_INPUT=""
           else
             TAG_NAME="${{ inputs.tag }}"
             PUBLISH_RELEASE="${{ inputs.publish_release }}"
-            PREVIOUS_TAG_INPUT="${{ inputs.previous_tag }}"
-          fi
+            PREVIOUS_REF_INPUT="${{ inputs.previous_tag }}"
 
-          if [[ -z "$TAG_NAME" ]]; then
-            echo "[ERROR] tag 不能为空"
-            exit 1
-          fi
+            if [[ -z "$TAG_NAME" ]]; then
+              echo "[ERROR] tag 不能为空"
+              exit 1
+            fi
 
-          if [[ "$TAG_NAME" != v* ]]; then
-            TAG_NAME="v$TAG_NAME"
+            if [[ "$TAG_NAME" != v* ]]; then
+              TAG_NAME="v$TAG_NAME"
+            fi
+
+            COMPARE_REF="HEAD"
+            PREVIOUS_REF=""
+            if git rev-parse -q --verify "refs/tags/$TAG_NAME" >/dev/null; then
+              git checkout -f "$TAG_NAME"
+              COMPARE_REF="$TAG_NAME"
+            else
+              echo "[WARN] 未找到 tag $TAG_NAME，将基于当前提交构建包"
+            fi
+
+            if [[ -n "$PREVIOUS_REF_INPUT" ]]; then
+              PREVIOUS_REF="$PREVIOUS_REF_INPUT"
+            else
+              PREVIOUS_REF="$(git tag --sort=-creatordate | grep -vx "$TAG_NAME" | head -n 1 || true)"
+            fi
+
+            IS_PRERELEASE=false
+            if [[ "$TAG_NAME" =~ (alpha|beta|rc|dev) ]]; then
+              IS_PRERELEASE=true
+            fi
           fi
 
           git fetch --tags --force
 
-          COMPARE_REF="HEAD"
-          if git rev-parse -q --verify "refs/tags/$TAG_NAME" >/dev/null; then
-            git checkout -f "$TAG_NAME"
-            COMPARE_REF="$TAG_NAME"
-          else
-            echo "[WARN] 未找到 tag $TAG_NAME，将基于当前提交构建包"
-          fi
-
-          if [[ -n "$PREVIOUS_TAG_INPUT" ]]; then
-            PREVIOUS_TAG="$PREVIOUS_TAG_INPUT"
-          else
-            PREVIOUS_TAG="$(git tag --sort=-creatordate | grep -vx "$TAG_NAME" | head -n 1 || true)"
-          fi
-
-          IS_PRERELEASE=false
-          if [[ "$TAG_NAME" =~ (alpha|beta|rc|dev) ]]; then
-            IS_PRERELEASE=true
-          fi
-
           echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
           echo "compare_ref=$COMPARE_REF" >> "$GITHUB_OUTPUT"
-          echo "previous_tag=$PREVIOUS_TAG" >> "$GITHUB_OUTPUT"
+          echo "previous_ref=$PREVIOUS_REF" >> "$GITHUB_OUTPUT"
           echo "publish_release=$PUBLISH_RELEASE" >> "$GITHUB_OUTPUT"
           echo "is_prerelease=$IS_PRERELEASE" >> "$GITHUB_OUTPUT"
 
@@ -132,16 +156,16 @@ jobs:
             exit 1
           fi
 
-          PREVIOUS_TAG="${{ steps.vars.outputs.previous_tag }}"
+          PREVIOUS_REF="${{ steps.vars.outputs.previous_ref }}"
           COMPARE_REF="${{ steps.vars.outputs.compare_ref }}"
 
           changed_count=0
           deleted_count=0
 
-          if [[ -n "$PREVIOUS_TAG" ]] && git rev-parse -q --verify "refs/tags/$PREVIOUS_TAG" >/dev/null; then
-            echo "Generate hotfix from $PREVIOUS_TAG -> $COMPARE_REF"
+          if [[ -n "$PREVIOUS_REF" ]] && git rev-parse -q --verify "$PREVIOUS_REF^{commit}" >/dev/null; then
+            echo "Generate hotfix from $PREVIOUS_REF -> $COMPARE_REF"
 
-            git diff --name-status "$PREVIOUS_TAG" "$COMPARE_REF" -- "${RESOURCE_DIRS[@]}" > dist/hotfix_changes.txt || true
+            git diff --name-status "$PREVIOUS_REF" "$COMPARE_REF" -- "${RESOURCE_DIRS[@]}" > dist/hotfix_changes.txt || true
 
             while IFS=$'\t' read -r status path1 path2; do
               [[ -z "$status" ]] && continue
