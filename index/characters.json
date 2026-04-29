@@ -1037,8 +1037,8 @@
       "path": "character/cthugha/03"
     }
   },
-  "cuchulainn":{
-        "01": {
+  "cuchulainn": {
+    "01": {
       "rarity": 3,
       "element": "dark",
       "weapon": "thrust",
@@ -3051,8 +3051,8 @@
       "path": "character/musashi/02"
     }
   },
-  "mynoghra":{
-        "01": {
+  "mynoghra": {
+    "01": {
       "rarity": 3,
       "element": "dark",
       "weapon": "slash",
@@ -3515,8 +3515,8 @@
       "path": "character/ravenarthur/02"
     }
   },
-  "redhood":{
-        "01": {
+  "redhood": {
+    "01": {
       "rarity": 3,
       "element": "evil",
       "weapon": "knock",
@@ -3837,8 +3837,8 @@
       "path": "character/shirou/04"
     }
   },
-  "shisa":{
-        "01": {
+  "shisa": {
+    "01": {
       "rarity": 3,
       "element": "wood",
       "weapon": "none",
@@ -4205,18 +4205,18 @@
       "path": "character/tangaroa/03"
     }
   },
-  "tangaroamugen": {
+  "tangaroainfinity": {
     "01": {
       "rarity": 3,
       "element": "world",
       "weapon": "slash",
-      "path": "character/tangaroamugen/01"
+      "path": "character/tangaroainfinity/01"
     },
     "02": {
       "rarity": 5,
       "element": "evil",
       "weapon": "longslash",
-      "path": "character/tangaroamugen/02"
+      "path": "character/tangaroainfinity/02"
     }
   },
   "tanngrisnir": {
@@ -4655,17 +4655,17 @@
       "path": "character/ulaanbaatar/03"
     }
   },
-  "vainamoinen":{
-    "01":{
+  "vainamoinen": {
+    "01": {
       "rarity": 3,
       "element": "water",
-      "weapon":"knock",
+      "weapon": "knock",
       "path": "character/vainamoinen/01"
     },
-    "02":{
+    "02": {
       "rarity": 4,
       "element": "water",
-      "weapon":"knock",
+      "weapon": "knock",
       "path": "character/vainamoinen/02"
     }
   },
@@ -4755,18 +4755,18 @@
       "path": "character/wakantanka/04"
     }
   },
-  "wakantankamugen": {
+  "wakantankainfinity": {
     "01": {
       "rarity": 3,
       "element": "world",
       "weapon": "shoot",
-      "path": "character/wakantankamugen/01"
+      "path": "character/wakantankainfinity/01"
     },
     "02": {
       "rarity": 5,
       "element": "water",
       "weapon": "snipe",
-      "path": "character/wakantankamugen/02"
+      "path": "character/wakantankainfinity/02"
     }
   },
   "williewildcat": {
