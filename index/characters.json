@@ -1545,6 +1545,20 @@
       "path": "character/gouryou/04"
     }
   },
+  "gugalanna": {
+    "01": {
+      "rarity": 3,
+      "element": "light",
+      "weapon": "thrust",
+      "path": "character/gugalanna/01"
+    },
+    "02": {
+      "rarity": 3,
+      "element": "light",
+      "weapon": "shoot",
+      "path": "character/gugalanna/02"
+    }
+  },
   "gullinbursti": {
     "01": {
       "rarity": 3,
@@ -1939,6 +1953,12 @@
       "element": "light",
       "weapon": "snipe",
       "path": "character/hotei/02"
+    },
+    "03": {
+      "rarity": 4,
+      "element": "wood",
+      "weapon": "magic",
+      "path": "character/hotei/03"
     }
   },
   "hougen": {
@@ -2109,6 +2129,12 @@
       "element": "all",
       "weapon": "shoot",
       "path": "character/ixbalanque/02"
+    },
+    "03": {
+      "rarity": 4,
+      "element": "wood",
+      "weapon": "knock",
+      "path": "character/ixbalanque/03"
     }
   },
   "jackfrost": {
@@ -3541,6 +3567,12 @@
       "element": "light",
       "weapon": "thrust",
       "path": "character/reprobus/02"
+    },
+    "03": {
+      "rarity": 5,
+      "element": "water",
+      "weapon": "shoot",
+      "path": "character/reprobus/03"
     }
   },
   "riku": {
@@ -3869,6 +3901,12 @@
       "element": "water",
       "weapon": "knock",
       "path": "character/shiva/03"
+    },
+    "04": {
+      "rarity": 5,
+      "element": "light",
+      "weapon": "longslash",
+      "path": "character/shiva/04"
     }
   },
   "shuten": {
