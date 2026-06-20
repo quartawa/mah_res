@@ -297,6 +297,20 @@
       "path": "character/andvari/03"
     }
   },
+  "angolmois": {
+    "01": {
+      "rarity": 3,
+      "element": "god",
+      "weapon": "none",
+      "path": "character/angolmois/01"
+    },
+    "02": {
+      "rarity": 4,
+      "element": "god",
+      "weapon": "none",
+      "path": "character/angolmois/02"
+    }
+  },
   "apollo": {
     "01": {
       "rarity": 3,
@@ -1251,6 +1265,20 @@
       "element": "water",
       "weapon": "thrust",
       "path": "character/eita/03"
+    }
+  },
+  "eldersalomonis": {
+    "01": {
+      "rarity": 3,
+      "element": "zero",
+      "weapon": "shoot",
+      "path": "character/eldersalomonis/01"
+    },
+    "02": {
+      "rarity": 5,
+      "element": "zero",
+      "weapon": "magic",
+      "path": "character/eldersalomonis/02"
     }
   },
   "ellie": {
@@ -2915,6 +2943,20 @@
       "path": "character/maria/03"
     }
   },
+  "masakado": {
+    "01": {
+      "rarity": 3,
+      "element": "infinity",
+      "weapon": "none",
+      "path": "character/masakado/01"
+    },
+    "02": {
+      "rarity": 5,
+      "element": "infinity",
+      "weapon": "none",
+      "path": "character/masakado/02"
+    }
+  },
   "masanori": {
     "01": {
       "rarity": 3,
@@ -3015,6 +3057,20 @@
       "element": "light",
       "weapon": "knock",
       "path": "character/mineaki/03"
+    }
+  },
+  "monaciello": {
+    "01": {
+      "rarity": 3,
+      "element": "dark",
+      "weapon": "knock",
+      "path": "character/monaciello/01"
+    },
+    "02": {
+      "rarity": 4,
+      "element": "dark",
+      "weapon": "thrust",
+      "path": "character/monaciello/02"
     }
   },
   "moritaka": {
