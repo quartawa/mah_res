@@ -2783,6 +2783,12 @@
       "element": "evil",
       "weapon": "magic",
       "path": "character/loki/02"
+    },
+    "03": {
+      "rarity": 4,
+      "element": "fire",
+      "weapon": "longslash",
+      "path": "character/loki/03"
     }
   },
   "lucifuge": {
@@ -3315,6 +3321,12 @@
       "element": "hero",
       "weapon": "longslash",
       "path": "character/oniwaka/03"
+    },
+    "04": {
+      "rarity": 5,
+      "element": "wood",
+      "weapon": "magic",
+      "path": "character/oniwaka/04"
     }
   },
   "onyankopon": {
@@ -3343,6 +3355,12 @@
       "element": "light",
       "weapon": "shoot",
       "path": "character/ophion/02"
+    },
+    "03": {
+      "rarity": 5,
+      "element": "world",
+      "weapon": "none",
+      "path": "character/ophion/03"
     }
   },
   "orgus": {
@@ -4353,6 +4371,20 @@
       "path": "character/taromaiti/03"
     }
   },
+  "tasaburo": {
+    "01": {
+      "rarity": 3,
+      "element": "light",
+      "weapon": "magic",
+      "path": "character/tasaburo/01"
+    },
+    "02": {
+      "rarity": 4,
+      "element": "light",
+      "weapon": "magic",
+      "path": "character/tasaburo/02"
+    }
+  },
   "taurus": {
     "01": {
       "rarity": 3,
@@ -4693,6 +4725,12 @@
       "element": "water",
       "weapon": "shoot",
       "path": "character/tuershen/02"
+    },
+    "03": {
+      "rarity": 4,
+      "element": "wood",
+      "weapon": "shoot",
+      "path": "character/tuershen/03"
     }
   },
   "tvastar": {
