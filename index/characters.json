@@ -79,6 +79,12 @@
       "element": "world",
       "weapon": "knock",
       "path": "character/ahuramazda/02"
+    },
+    "03": {
+      "rarity": 4,
+      "element": "fire",
+      "weapon": "magic",
+      "path": "character/ahuramazda/03"
     }
   },
   "aizen": {
@@ -631,6 +637,20 @@
       "element": "light",
       "weapon": "shoot",
       "path": "character/barong/03"
+    }
+  },
+  "bassareus": {
+    "01": {
+      "rarity": 3,
+      "element": "wood",
+      "weapon": "magic",
+      "path": "character/bassareus/01"
+    },
+    "02": {
+      "rarity": 4,
+      "element": "wood",
+      "weapon": "magic",
+      "path": "character/bassareus/02"
     }
   },
   "bathym": {
@@ -1801,6 +1821,20 @@
       "path": "character/hekate/03"
     }
   },
+  "hel": {
+    "01": {
+      "rarity": 3,
+      "element": "dark",
+      "weapon": "shoot",
+      "path": "character/hel/01"
+    },
+    "02": {
+      "rarity": 4,
+      "element": "dark",
+      "weapon": "shoot",
+      "path": "character/hel/02"
+    }
+  },
   "hephaestus": {
     "01": {
       "rarity": 3,
@@ -2095,6 +2129,12 @@
       "element": "light",
       "weapon": "knock",
       "path": "character/inari/02"
+    },
+    "03": {
+      "rarity": 5,
+      "element": "water",
+      "weapon": "magic",
+      "path": "character/inari/03"
     }
   },
   "isaac": {
@@ -3613,6 +3653,12 @@
       "element": "evil",
       "weapon": "slash",
       "path": "character/ravenarthur/02"
+    },
+    "03": {
+      "rarity": 4,
+      "element": "evil",
+      "weapon": "knock",
+      "path": "character/ravenarthur/03"
     }
   },
   "redhood": {
@@ -3769,6 +3815,12 @@
       "element": "light",
       "weapon": "none",
       "path": "character/sanzo/02"
+    },
+    "03": {
+      "rarity": 5,
+      "element": "hero",
+      "weapon": "slash",
+      "path": "character/sanzo/03"
     }
   },
   "sarutahiko": {
