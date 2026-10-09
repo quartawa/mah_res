@@ -1,2 +1,5 @@
 main.py
-/tools
+/tools/*
+!/tools/build_release.py
+**/__pycache__/
+*.py[cod]

@@ -37,16 +37,20 @@ jobs:
       - name: Resolve version and refs
         id: vars
         shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_TAG: ${{ github.ref_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+          INPUT_PUBLISH: ${{ inputs.publish_release }}
+          INPUT_PREVIOUS: ${{ inputs.previous_tag }}
         run: |
           set -euo pipefail
-
-          EVENT_NAME="${{ github.event_name }}"
           git fetch --tags --force
 
           if [[ "$EVENT_NAME" == "push" ]]; then
-            TAG_NAME="${{ github.ref_name }}"
-            PREVIOUS_REF="$(git tag --sort=-creatordate | grep -vx "$TAG_NAME" | head -n 1 || true)"
+            TAG_NAME="$RELEASE_TAG"
             COMPARE_REF="$TAG_NAME"
+            PREVIOUS_REF="$(git tag --merged "$COMPARE_REF" --sort=-creatordate | grep -vxF "$TAG_NAME" | head -n 1 || true)"
             IS_PRERELEASE=false
             if [[ "$TAG_NAME" =~ (alpha|beta|rc|dev) ]]; then
               IS_PRERELEASE=true
@@ -54,9 +58,9 @@ jobs:
 
             PUBLISH_RELEASE=true
           else
-            TAG_NAME="${{ inputs.tag }}"
-            PUBLISH_RELEASE="${{ inputs.publish_release }}"
-            PREVIOUS_REF_INPUT="${{ inputs.previous_tag }}"
+            TAG_NAME="$INPUT_TAG"
+            PUBLISH_RELEASE="$INPUT_PUBLISH"
+            PREVIOUS_REF_INPUT="$INPUT_PREVIOUS"
 
             if [[ -z "$TAG_NAME" ]]; then
               echo "[ERROR] tag 不能为空"
@@ -70,7 +74,6 @@ jobs:
             COMPARE_REF="HEAD"
             PREVIOUS_REF=""
             if git rev-parse -q --verify "refs/tags/$TAG_NAME" >/dev/null; then
-              git checkout -f "$TAG_NAME"
               COMPARE_REF="$TAG_NAME"
             else
               echo "[WARN] 未找到 tag $TAG_NAME，将基于当前提交构建包"
@@ -79,7 +82,7 @@ jobs:
             if [[ -n "$PREVIOUS_REF_INPUT" ]]; then
               PREVIOUS_REF="$PREVIOUS_REF_INPUT"
             else
-              PREVIOUS_REF="$(git tag --sort=-creatordate | grep -vx "$TAG_NAME" | head -n 1 || true)"
+              PREVIOUS_REF="$(git tag --merged "$COMPARE_REF" --sort=-creatordate | grep -vxF "$TAG_NAME" | head -n 1 || true)"
             fi
 
             IS_PRERELEASE=false
@@ -89,144 +92,37 @@ jobs:
           fi
 
           echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
-          echo "compare_ref=$COMPARE_REF" >> "$GITHUB_OUTPUT"
+          TARGET_COMMIT="$(git rev-parse --verify "$COMPARE_REF^{commit}")"
+          echo "compare_ref=$TARGET_COMMIT" >> "$GITHUB_OUTPUT"
           echo "previous_ref=$PREVIOUS_REF" >> "$GITHUB_OUTPUT"
           echo "publish_release=$PUBLISH_RELEASE" >> "$GITHUB_OUTPUT"
           echo "is_prerelease=$IS_PRERELEASE" >> "$GITHUB_OUTPUT"
 
-      - name: Build full package
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          mkdir -p dist/full
-
-          RESOURCE_DIRS=()
-          for d in assets image index announcement model pipeline resource; do
-            if [[ -d "$d" ]]; then
-              RESOURCE_DIRS+=("$d")
-            fi
-          done
-
-          if [[ ${#RESOURCE_DIRS[@]} -eq 0 ]]; then
-            echo "[ERROR] 未找到可打包资源目录"
-            exit 1
-          fi
-
-          echo "Package full resource dirs: ${RESOURCE_DIRS[*]}"
-          for d in "${RESOURCE_DIRS[@]}"; do
-            mkdir -p "dist/full/$d"
-            rsync -a "$d/" "dist/full/$d/"
-          done
-
-      - name: Build hotfix package
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          mkdir -p dist/hotfix
-
-          RESOURCE_DIRS=()
-          for d in assets image index announcement model pipeline resource; do
-            if [[ -d "$d" ]]; then
-              RESOURCE_DIRS+=("$d")
-            fi
-          done
-
-          if [[ ${#RESOURCE_DIRS[@]} -eq 0 ]]; then
-            echo "[ERROR] 未找到可打包资源目录"
-            exit 1
-          fi
-
-          PREVIOUS_REF="${{ steps.vars.outputs.previous_ref }}"
-          COMPARE_REF="${{ steps.vars.outputs.compare_ref }}"
-
-          changed_count=0
-          deleted_count=0
-
-          if [[ -n "$PREVIOUS_REF" ]] && git rev-parse -q --verify "$PREVIOUS_REF^{commit}" >/dev/null; then
-            echo "Generate hotfix from $PREVIOUS_REF -> $COMPARE_REF"
-
-            git diff --name-status "$PREVIOUS_REF" "$COMPARE_REF" -- "${RESOURCE_DIRS[@]}" > dist/hotfix_changes.txt || true
-
-            while IFS=$'\t' read -r status path1 path2; do
-              [[ -z "$status" ]] && continue
-
-              is_resource_path=false
-              for d in "${RESOURCE_DIRS[@]}"; do
-                if [[ "$path1" == "$d/"* ]]; then
-                  is_resource_path=true
-                  break
-                fi
-              done
-
-              if ! $is_resource_path; then
-                continue
-              fi
-
-              if [[ "$status" == D* ]]; then
-                mkdir -p dist/hotfix
-                echo "$path1" >> dist/hotfix_deleted_files.txt
-                deleted_count=$((deleted_count + 1))
-                continue
-              fi
-
-              src_path="$path1"
-              if [[ "$status" == R* || "$status" == C* ]]; then
-                src_path="$path2"
-              fi
-
-              if [[ -f "$src_path" ]]; then
-                mkdir -p "dist/hotfix/$(dirname "$src_path")"
-                cp "$src_path" "dist/hotfix/$src_path"
-                changed_count=$((changed_count + 1))
-              fi
-            done < dist/hotfix_changes.txt
-          else
-            echo "No valid previous tag, fallback to full assets as hotfix baseline package"
-            for d in "${RESOURCE_DIRS[@]}"; do
-              mkdir -p "dist/hotfix/$d"
-              rsync -a "$d/" "dist/hotfix/$d/"
-            done
-            changed_count=1
-          fi
-
-          if [[ $changed_count -eq 0 && $deleted_count -eq 0 ]]; then
-            echo "no file changed" > dist/hotfix/.hotfix-empty
-          fi
-
-      - name: Archive packages
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          TAG_NAME="${{ steps.vars.outputs.tag_name }}"
-
-          (
-            cd dist/full
-            zip -r "../mah_res-full-${TAG_NAME}.zip" .
-          )
-
-          (
-            cd dist/hotfix
-            zip -r "../mah_res-hotfix-${TAG_NAME}.zip" .
-          )
+      - name: Build verified resource packages
+        env:
+          TAG_NAME: ${{ steps.vars.outputs.tag_name }}
+          COMPARE_REF: ${{ steps.vars.outputs.compare_ref }}
+          PREVIOUS_REF: ${{ steps.vars.outputs.previous_ref }}
+        run: python3 tools/build_release.py --version "$TAG_NAME" --target "$COMPARE_REF" --base "$PREVIOUS_REF"
 
       - name: Upload package artifacts
         uses: actions/upload-artifact@v4
         with:
           name: mah_res-packages-${{ steps.vars.outputs.tag_name }}
           path: |
-            dist/mah_res-full-${{ steps.vars.outputs.tag_name }}.zip
-            dist/mah_res-hotfix-${{ steps.vars.outputs.tag_name }}.zip
+            dist/mah_res-full-*.zip
+            dist/mah_res-hotfix-*.zip
+            dist/mah_res-manifest.json
 
       - name: Publish GitHub Release
         if: ${{ steps.vars.outputs.publish_release == 'true' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.vars.outputs.tag_name }}
+          target_commitish: ${{ steps.vars.outputs.compare_ref }}
           files: |
-            dist/mah_res-full-${{ steps.vars.outputs.tag_name }}.zip
-            dist/mah_res-hotfix-${{ steps.vars.outputs.tag_name }}.zip
+            dist/mah_res-full-*.zip
+            dist/mah_res-hotfix-*.zip
+            dist/mah_res-manifest.json
           prerelease: ${{ steps.vars.outputs.is_prerelease }}
           draft: false
