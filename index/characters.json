@@ -2049,6 +2049,20 @@
       "path": "character/hougen/04"
     }
   },
+  "huxian": {
+    "01": {
+      "rarity": 3,
+      "element": "wood",
+      "weapon": "knock",
+      "path": "character/huxian/01"
+    },
+    "02": {
+      "rarity": 5,
+      "element": "wood",
+      "weapon": "knock",
+      "path": "character/huxian/02"
+    }
+  },
   "ibaraki": {
     "01": {
       "rarity": 3,
@@ -4851,6 +4865,20 @@
       "element": "water",
       "weapon": "knock",
       "path": "character/vainamoinen/02"
+    }
+  },
+  "vaisravana": {
+    "01": {
+      "rarity": 3,
+      "element": "water",
+      "weapon": "thrust",
+      "path": "character/vaisravana/01"
+    },
+    "02": {
+      "rarity": 5,
+      "element": "water",
+      "weapon": "thrust",
+      "path": "character/vaisravana/02"
     }
   },
   "vapula": {
