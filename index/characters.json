@@ -1593,6 +1593,14 @@
       "path": "character/gouryou/04"
     }
   },
+  "graduatefamily": {
+    "02": {
+      "rarity": 5,
+      "element": "god",
+      "weapon": "magic",
+      "path": "character/graduatefamily/02"
+    }
+  },
   "gugalanna": {
     "01": {
       "rarity": 3,
@@ -2723,6 +2731,20 @@
       "element": "god",
       "weapon": "none",
       "path": "character/kyouma/02"
+    }
+  },
+  "kyouma1999": {
+    "01": {
+      "rarity": 3,
+      "element": "light",
+      "weapon": "slash",
+      "path": "character/kyouma1999/01"
+    },
+    "02": {
+      "rarity": 5,
+      "element": "all",
+      "weapon": "longslash",
+      "path": "character/kyouma1999/02"
     }
   },
   "kyuuma": {
