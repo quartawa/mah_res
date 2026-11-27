@@ -2983,6 +2983,12 @@
       "element": "fire",
       "weapon": "slash",
       "path": "character/marchosias/02"
+    },
+    "03": {
+      "rarity": 5,
+      "element": "light",
+      "weapon": "slash",
+      "path": "character/marchosias/03"
     }
   },
   "marduk": {
@@ -3179,6 +3185,12 @@
       "element": "hero",
       "weapon": "shoot",
       "path": "character/moritaka/04"
+    },
+    "05": {
+      "rarity": 5,
+      "element": "infinity",
+      "weapon": "slash",
+      "path": "character/moritaka/05"
     }
   },
   "motosumi": {
