@@ -3960,14 +3960,14 @@
     },
     "03": {
       "rarity": 5,
-      "element": "fire",
-      "weapon": "shoot",
+      "element": "wood",
+      "weapon": "longslash",
       "path": "character/shennong/03"
     },
     "04": {
       "rarity": 5,
-      "element": "wood",
-      "weapon": "longslash",
+      "element": "fire",
+      "weapon": "shoot",
       "path": "character/shennong/04"
     }
   },
